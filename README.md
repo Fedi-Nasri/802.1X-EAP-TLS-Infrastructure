@@ -42,9 +42,7 @@ The setup simulates a real enterprise network architecture across three VirtualB
 
 ## Architecture
 
-```
-Image 
-```
+![Network Architecture](img/architecture.png)
 
 ### IP Addressing
 
@@ -66,6 +64,12 @@ Image
 | Client | alice | alice@lab.local |
 | LDAP Domain | dc=lab,dc=local | lab.local |
 
+### Trust Anchor (PKI Chain of Trust)
+
+The Certificate Authority (`LabCA`) is the single root of trust for the entire infrastructure. Every entity — RADIUS server and client — holds a copy of `ca.crt` and uses it to verify the other party's certificate during the mutual TLS handshake.
+
+![Trust Anchor — PKI Chain of Trust](img/trust-anchor.png)
+
 ---
 
 ## Components
@@ -85,7 +89,7 @@ Image
 ```
 VM3 (Client)          VM2 (AP / Relay)         VM1 (RADIUS)
      │                       │                       │
-     │──── EAPOL-Start ─────►│                       │
+     │──── EAPOL-Start ──────►│                       │
      │◄─── EAP-Request/ID ───│                       │
      │──── EAP-Response/ID ──►│                       │
      │                       │──RADIUS Access-Req ───►│
@@ -125,6 +129,42 @@ sudo apt install hostapd isc-dhcp-server bridge-utils
 ```bash
 sudo apt install wpasupplicant
 ```
+
+---
+
+## Project Structure
+
+```
+802.1X-EAP-TLS-Infrastructure/
+│
+├── README.md
+│
+├── docs/
+│   ├── rapport.pdf                        # Full project report (French)
+│   └── presentation.pptx                  # Slide deck
+│
+├── pki/
+│   ├── generate-ca.sh                     # Generate root CA
+│   ├── generate-radius-cert.sh            # Generate RADIUS server cert
+│   └── generate-client-cert.sh            # Generate client cert (alice)
+│
+├── vm1-server/
+│   ├── ldap/
+│   │   ├── base.ldif                      # LDAP base structure
+│   │   └── alice.ldif                     # Alice user entry
+│   └── freeradius/
+│       ├── eap                            # EAP-TLS module config
+│       └── clients.conf                   # RADIUS clients (AP declaration)
+│
+├── vm2-ap/
+│   ├── hostapd.conf                       # Access point config
+│   ├── dhcpd.conf                         # DHCP server config
+│   └── routing-setup.sh                   # iptables + IP forwarding rules
+│
+└── vm3-client/
+    └── wpa_supplicant.conf                # EAP-TLS supplicant config
+```
+
 ---
 
 ## Setup Guide
@@ -276,6 +316,8 @@ radius     # RADIUS packets (UDP 1812)
 tls        # TLS handshake
 dhcp       # DHCP exchange
 ```
+
+![Wireshark Capture — Full EAP-TLS Handshake](img/wireshark.png)
 
 ---
 
