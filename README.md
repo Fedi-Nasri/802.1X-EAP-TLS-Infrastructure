@@ -88,22 +88,22 @@ The Certificate Authority (`LabCA`) is the single root of trust for the entire i
 
 ```
 VM3 (Client)          VM2 (AP / Relay)         VM1 (RADIUS)
-     │                       │                       │
-     │──── EAPOL-Start ──────►│                       │
-     │◄─── EAP-Request/ID ───│                       │
-     │──── EAP-Response/ID ──►│                       │
-     │                       │──RADIUS Access-Req ───►│
-     │                       │◄─RADIUS Challenge ────│
-     │◄────── TLS Client Hello (tunneled) ────────────│
+     │                        │                        │
+     │──── EAPOL-Start ──────►│                        │
+     │◄─── EAP-Request/ID ────│                        │
+     │──── EAP-Response/ID ──►│                        │
+     │                        │──RADIUS Access-Req ───►│
+     │                        │◄──RADIUS Challenge ────│
+     │◄────── TLS Client Hello (tunneled) ─────────────│
      │──────── Server Hello + radius.crt ─────────────►│
-     │  [Verify radius.crt against ca.crt]            │
+     │  [Verify radius.crt against ca.crt]             │
      │──── alice.crt + Cert Verify + Finished ────────►│
-     │                       │  [Verify alice.crt]    │
-     │                       │  [LDAP lookup: alice]  │
-     │                       │◄─RADIUS Access-Accept─│
-     │◄─── EAP-Success ──────│                       │
-     │──── DHCP Discover ────►│                       │
-     │◄─── DHCP Offer/ACK ───│                       │
+     │                       │  [Verify alice.crt]     │
+     │                       │  [LDAP lookup: alice]   │
+     │                       │◄─RADIUS Access-Accept───│
+     │◄─── EAP-Success ──────│                         │
+     │──── DHCP Discover ───►│                         │
+     │◄─── DHCP Offer/ACK ───│                         │
 ```
 
 > **Important:** VM3 and VM1 never communicate directly. VM2 is the relay: it encapsulates EAP messages into RADIUS packets toward VM1 and forwards responses back to VM3. The TLS tunnel is end-to-end between VM3 and VM1 — VM2 is opaque to its content.
